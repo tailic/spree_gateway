@@ -1,4 +1,18 @@
-# Inspired by https://stripe.com/docs/stripe.js
+# Inspired by https://stripe.com/docs/stripe.js# Inspired by https://stripe.com/docs/stripe.js
+errorMessages =
+  incorrect_number: "Die Kartennummer ist nicht richtig. Bitte prüfen Sie Ihre Eingabe."
+  invalid_number: "Die Kartennummer ist keine gültige Kreditkartennummer. Bitte prüfen Sie Ihre Eingabe."
+  invalid_expiry_month: "Der Monat im Verfallsdatum ist ungültig. Bitte prüfen Sie Ihre Eingabe."
+  invalid_expiry_year: "Das Jahr im Verfallsdatum ist ungültig. Bitte prüfen Sie Ihre Eingabe."
+  invalid_cvc: "Die Kartenprüfnummer ist ungültig. Bitte prüfen Sie Ihre Eingabe."
+  expired_card: "Die Karte ist abgelaufen. Bitte prüfen Sie Ihre Eingabe."
+  incorrect_cvc: "Die Kartenprüfnummer ist falsch. Bitte prüfen Sie Ihre Eingabe."
+  incorrect_zip: "The card's zip code failed validation. Bitte prüfen Sie Ihre Eingabe."
+  card_declined: "Die Kreditkarte wurde abgelehnt."
+  missing: "Es gibt keine Zuordnung der Kreditkarte zu einem Kundenaccount."
+  processing_error: "Bei der Bearbeitung ist ein Fehler aufgetreten."
+  rate_limit: "Es wurden zuviele Anfragen gestellt. Bitte informieren Sie uns, falls dieser Fehler anhält."
+
 
 # Map cc types from stripe to spree
 mapCC = (ccType) ->
@@ -17,8 +31,19 @@ mapCC = (ccType) ->
 
 
 $(document).ready ->
+  $("#cvv_link_new").fancybox
+    maxWidth	: 650,
+    maxHeight	: 600,
+    #fitToView	: false,
+    #width		: '70%',
+    #height		: '70%',
+    #autoSize	: false,
+    #closeClick	: false,
+    #openEffect	: 'none',
+    #closeEffect	: 'none'
+
   # For errors that happen later.
-  Spree.stripePaymentMethod.prepend("<div id='stripeError' class='errorExplanation' style='display:none'></div>")
+  Spree.stripePaymentMethod.prepend("<div id='stripeError' class='errorExplanation alert alert-danger' style='display:none'></div>")
 
   $('.continue').click ->
     $('#stripeError').hide()
@@ -38,8 +63,8 @@ $(document).ready ->
       return false
 
 stripeResponseHandler = (status, response) ->
-  if response.error
-    $('#stripeError').html(response.error.message)
+  if response.error && response.error.type == 'card_error'
+    $('#stripeError').html(errorMessages[ response.error.code ])
     $('#stripeError').show()
   else
     Spree.stripePaymentMethod.find('#card_number, #card_expiry, #card_code').prop("disabled" , true)
